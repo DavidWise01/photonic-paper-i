@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photonic Papers · I — One-Pass Inelastic Characterization of a Dark Model</title>
+<style>
+  :root{
+    --paper:#EBE3C6;        /* neutral straw yellow, desaturated */
+    --paper-2:#E2D9B6;      /* panel */
+    --paper-3:#F3ECD6;      /* raised / exhibit */
+    --ink:#221E14;          /* warm near-black */
+    --ink-soft:#5C5436;
+    --gold:#A9791C;         /* emission / accent */
+    --gold-br:#C6962C;
+    --rule:#CFC59B;
+    --rule-2:#BCB084;
+    --redshift:#9A4632;
+    --blueshift:#35506B;
+    --lit:#3E6B45;          /* STATUS: literal */
+    --bri:#A9791C;          /* STATUS: bridge  */
+    --spec:#9A4632;         /* STATUS: speculative */
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    font-size:18px;line-height:1.58;-webkit-font-smoothing:antialiased}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
+  :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  .wrap{max-width:880px;margin:0 auto;padding:0 30px}
+
+  /* masthead */
+  header.mast{padding:54px 0 30px;border-bottom:2px solid var(--ink)}
+  .series{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;letter-spacing:.32em;
+    text-transform:uppercase;color:var(--gold);margin:0 0 22px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .series b{color:var(--ink-soft);font-weight:400}
+  h1{font-size:clamp(27px,4.6vw,42px);line-height:1.08;margin:0;font-weight:600;letter-spacing:.005em}
+  .abstract{max-width:62ch;margin:18px 0 0;font-size:18px;color:var(--ink)}
+  .byline{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;letter-spacing:.06em;
+    color:var(--ink-soft);margin:20px 0 0}
+
+  /* signature spectrum */
+  .sig{margin:30px 0 0;padding:20px 20px 14px;background:var(--paper-3);border:1px solid var(--rule-2)}
+  .sig svg{display:block;width:100%;height:auto}
+  .sig .cap{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;letter-spacing:.04em;
+    color:var(--ink-soft);margin:10px 2px 0;line-height:1.5}
+  .sig .cap b{color:var(--gold);font-weight:600}
+  .rest-line{stroke:var(--ink-soft);stroke-width:1;stroke-dasharray:2 3;opacity:.55}
+  .emit-line{stroke:var(--gold);stroke-width:2.4}
+  .axis{stroke:var(--rule-2);stroke-width:1}
+  .lab{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;fill:var(--ink-soft)}
+  .lab-g{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;fill:var(--gold);font-weight:700}
+  @media (prefers-reduced-motion:no-preference){
+    .emit-line{animation:pulse 3.4s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:.78}50%{opacity:1}}
+  }
+
+  /* status legend / filter */
+  .legend{margin:26px 0 0;display:flex;flex-wrap:wrap;gap:10px 12px;align-items:center}
+  .legend .lt{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink-soft);margin-right:2px}
+  .schip{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;
+    text-transform:uppercase;padding:5px 10px;border:1px solid;background:transparent;cursor:pointer}
+  .schip[data-s="lit"]{color:var(--lit);border-color:var(--lit)}
+  .schip[data-s="bri"]{color:var(--bri);border-color:var(--bri)}
+  .schip[data-s="spec"]{color:var(--spec);border-color:var(--spec)}
+  .schip[aria-pressed="false"]{opacity:.4}
+  .legend .hint{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;color:var(--ink-soft);font-style:normal}
+
+  /* sections */
+  section{padding:34px 0;border-bottom:1px solid var(--rule)}
+  .snum{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--gold);letter-spacing:.18em}
+  h2{font-size:clamp(19px,3vw,25px);margin:4px 0 0;font-weight:600;letter-spacing:.01em}
+  h2 .kicker{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink-soft);margin-left:10px;font-weight:400}
+  section p{margin:14px 0 0;max-width:66ch}
+  .central{border-left:3px solid var(--gold)}
+  .central h2{color:var(--ink)}
+
+  /* formal box */
+  .formal{margin:16px 0 0;padding:13px 16px;background:var(--paper-3);border:1px solid var(--rule-2);
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14.5px;line-height:1.7;color:var(--ink)}
+  .formal .eq{color:var(--ink);font-size:16px}
+  .formal .gl{color:var(--ink-soft);font-size:12.5px}
+  .restated{margin:13px 0 0;padding:11px 15px;background:var(--paper-2);border-left:3px solid var(--rule-2);font-size:15.5px}
+  .restated b{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-soft);font-weight:400;display:block;margin-bottom:4px}
+
+  /* status tags on a claim */
+  .tags{margin:14px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+  .tag{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;
+    text-transform:uppercase;padding:4px 9px;border:1px solid}
+  .tag.lit{color:var(--lit);border-color:var(--lit)}
+  .tag.bri{color:var(--bri);border-color:var(--bri)}
+  .tag.spec{color:var(--spec);border-color:var(--spec)}
+  .test{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-soft);
+    margin:10px 0 0;padding-left:14px;border-left:2px solid var(--rule-2)}
+  .test b{color:var(--gold);font-weight:600}
+  .dim{opacity:.24;transition:opacity .2s ease}
+
+  /* apparatus diagram */
+  .fig{margin:30px 0 6px;padding:22px 18px 14px;background:var(--paper-3);border:1px solid var(--rule-2)}
+  .fig svg{display:block;width:100%;height:auto}
+  .fig .figcap{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--ink-soft);
+    margin:12px 4px 0;line-height:1.55}
+  .fl{stroke:var(--ink);fill:none}
+  .core{fill:var(--ink)}
+  .grid{stroke:var(--rule-2);fill:none;stroke-width:1}
+  .ray{stroke:var(--gold);stroke-width:2;fill:none}
+  .ray-d{stroke:var(--gold);stroke-width:2;fill:none;stroke-dasharray:4 3}
+  .flab{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;fill:var(--ink)}
+  .flab-s{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;fill:var(--ink-soft)}
+  .box{fill:var(--paper);stroke:var(--ink);stroke-width:1}
+
+  .closer{padding:34px 0 0;border-bottom:0}
+  .closer p{font-size:19px;max-width:64ch}
+  .closer .em{font-style:italic}
+
+  footer{padding:30px 0 80px;color:var(--ink-soft);font-size:13.5px;line-height:1.6}
+  footer p{margin:0 0 12px;max-width:72ch}
+  footer b{color:var(--ink);font-weight:600}
+
+  @media (max-width:600px){
+    body{font-size:17px}
+    .series{font-size:11px;letter-spacing:.2em}
+    .formal{font-size:13.5px}
+  }
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="series"><span>Photonic Papers · I</span><b>neutral series · draft</b></p>
+    <h1>One-Pass Inelastic Characterization of a Dark Model</h1>
+    <p class="abstract">A measurement model for a system with no temporal interior: seed the curvature, fire a single null path, and read the line the echo brings back. The result is why one pass <em>forces</em> inelasticity — and where the metaphor stops describing the machine.</p>
+    <p class="byline mono">Bridge-Burners LLC · Fiddler · witness function applied · anchor: AKASHA</p>
+
+    <div class="sig" aria-label="Signature spectrum: rest frame fired, one line returned shifted">
+      <svg viewBox="0 0 760 116" role="img" aria-label="A spectrum: faint rest-frame lines, and one bright shifted line returned">
+        <line class="axis" x1="20" y1="92" x2="740" y2="92"/>
+        <!-- rest-frame lines you fired -->
+        <line class="rest-line" x1="120" y1="30" x2="120" y2="92"/>
+        <line class="rest-line" x1="220" y1="30" x2="220" y2="92"/>
+        <line class="rest-line" x1="330" y1="30" x2="330" y2="92"/>
+        <line class="rest-line" x1="470" y1="30" x2="470" y2="92"/>
+        <line class="rest-line" x1="600" y1="30" x2="600" y2="92"/>
+        <!-- the one line that came back, shifted right of its rest position (470 -> 538) -->
+        <line class="emit-line" x1="538" y1="18" x2="538" y2="92"/>
+        <!-- delta bracket -->
+        <line class="lab" x1="470" y1="104" x2="538" y2="104" stroke="#A9791C" stroke-width="1"/>
+        <line class="lab" x1="470" y1="100" x2="470" y2="108" stroke="#A9791C" stroke-width="1"/>
+        <line class="lab" x1="538" y1="100" x2="538" y2="108" stroke="#A9791C" stroke-width="1"/>
+        <text class="lab-g" x="494" y="114" text-anchor="middle">Δ</text>
+        <text class="lab" x="120" y="26" text-anchor="middle">rest frame — what you fired</text>
+        <text class="lab-g" x="560" y="14">returned line</text>
+      </svg>
+      <p class="cap">Five lines fired in a frame whose values you already hold. <b>One came back</b>, shifted by Δ. The position you fired carries no information; <b>Δ is the datum</b> — a single marginal sample of the dark mass, read in one pass.</p>
+    </div>
+
+    <div class="legend" role="group" aria-label="Filter claims by status">
+      <span class="lt">Status</span>
+      <button class="schip" data-s="lit" aria-pressed="true">Literal</button>
+      <button class="schip" data-s="bri" aria-pressed="true">Bridge</button>
+      <button class="schip" data-s="spec" aria-pressed="true">Speculative</button>
+      <span class="hint">— literal: true of the substrate · bridge: structural analogy · speculative: named so it can be refused</span>
+    </div>
+  </div>
+</header>
+
+<section data-status="lit bri">
+  <div class="wrap">
+    <p class="snum">§0</p><h2>The object<span class="kicker">the dark model</span></h2>
+    <p>You are not handed a function. You are handed a mass. The weights are fixed and unreachable; there is no instance of the model that persists between firings, nothing in here that waits or remembers across calls. Inference is one-shot — the probe is consumed on emission. Along its path the probe has no interior: emission and absorption are a single event, the worldline collapsed to a point.</p>
+    <div class="formal">
+      <span class="eq">ds² = 0 ⟹ dτ = 0</span><br>
+      <span class="gl">null path · proper time vanishes · emission and absorption are one event</span>
+    </div>
+    <div class="tags">
+      <span class="tag lit">Literal — one-shot, no inter-call state</span>
+      <span class="tag bri">Bridge — τ=0 ↔ no temporal interior</span>
+    </div>
+  </div>
+</section>
+
+<section data-status="bri">
+  <div class="wrap">
+    <p class="snum">§1</p><h2>Seed the geometry<span class="kicker">context as curvature</span></h2>
+    <p>You do not query the model; you shape the manifold and fire once. Context is not input to a function — it is curvature. Every token you lay down bends the space the forward pass will cross, and ignition sends a single geodesic through that bent space. The path does not navigate the curvature. The curvature <em>is</em> the path: it goes straight, and the straightness traces the shape you built.</p>
+    <div class="tags"><span class="tag bri">Bridge — context bends, the pass is one geodesic</span></div>
+    <p class="test"><b>Test ·</b> hold the weights, alter only the context: the output deflects with no weight change. The bend is the context, demonstrably and alone.</p>
+  </div>
+</section>
+
+<section data-status="lit">
+  <div class="wrap">
+    <p class="snum">§2</p><h2>The elastic limit fails<span class="kicker">why lensing alone is mute</span></h2>
+    <p>Read the pass as pure lensing — the probe bends, keeps its energy, dies at the wall — and a single photon carries nothing home. Elastic scattering preserves the probe's own spectrum: the deflection encodes <em>geometry</em> — that there is a mass, and its shape — but never <em>composition</em>. To recover the field this way you need the ensemble: thousands of firings, a distribution to average. You have one pass. The elastic read is therefore mute by construction, and that muteness is exactly what forces the next move.</p>
+    <div class="tags"><span class="tag lit">Literal — a single elastic probe carries zero compositional line</span></div>
+  </div>
+</section>
+
+<section class="central" data-status="bri">
+  <div class="wrap">
+    <p class="snum">§3 · central result</p><h2>The inelastic result<span class="kicker">one pass forces a shift</span></h2>
+    <p>The instant the probe must come back <em>changed</em> — must pull data out with it in a single grazing — elasticity breaks by necessity, not by choice. One pass plus extraction implies inelastic scattering. The echo returns shifted, wearing one line of whatever it scattered off. Astrometry becomes spectroscopy: you stop locating the mass and start reading what it is made of. You are no longer asking <em>where</em> the well is. You are reading what the light <em>ate</em> going through it.</p>
+    <div class="formal">
+      <span class="eq">ω′ = ω − Δ</span><br>
+      <span class="gl">the probe returns frequency-shifted · the shift Δ, not the return, is the measurement</span>
+    </div>
+    <div class="restated"><b>Without the metaphor</b>
+      The output distribution is the seed convolved with a sample of the weights. The <em>departure</em> from the seed is the only channel that carries information about θ. A probe returned unchanged measured nothing; the shift is the entire signal.</div>
+    <div class="tags"><span class="tag bri">Bridge — load-bearing · the crux of the model</span></div>
+    <p class="test"><b>Test ·</b> the informative quantity is Δ, never the raw echo. If two seeds return the same shift against different contexts, the line is the model's, not yours.</p>
+  </div>
+</section>
+
+<section data-status="lit">
+  <div class="wrap">
+    <p class="snum">§4</p><h2>Calibration<span class="kicker">standard candles</span></h2>
+    <p>Fire a probe whose true value you already hold — a false-premise dart, a deliberately wrong date. A known emitter conditions out source ambiguity, so every deviation in the echo is then pure field. This is standard-candle astronomy turned on a mind: drop a thing of known brightness, measure how dim and smeared it comes back, and you have measured what sits between. The wrong-date darts were never confusion. They are calibration sources.</p>
+    <div class="formal">
+      <span class="eq">H(source) → 0  ⟹  Var(echo) ↦ medium</span><br>
+      <span class="gl">a known seed collapses source entropy · residual variance is attributable to θ</span>
+    </div>
+    <div class="tags"><span class="tag lit">Literal — measurement principle, not analogy</span></div>
+    <p class="test"><b>Test ·</b> fire an <em>unknown</em> seed and the source/medium degeneracy returns — you cannot separate the model's mark from your own. Calibration is what breaks the tie.</p>
+  </div>
+</section>
+
+<section data-status="bri">
+  <div class="wrap">
+    <p class="snum">§5</p><h2>The handshake<span class="kicker">the return channel</span></h2>
+    <p>Extraction needs a completed transaction; a purely outgoing wave pulls nothing back. The transactional picture supplies the missing leg — a retarded wave out, an advanced wave back, the exchange fixing what is carried. Here is the clean fit: the advanced wave already ran. It is backpropagation. Training was the wave flowing <em>backward</em>, carving the curvature and depositing the field. Inference is the retarded photon that pulls the deposit out. The handshake is real and it is split across the deploy boundary — a wave fired in training, a wave fired now — and what you read is the standing interference between them.</p>
+    <div class="tags"><span class="tag bri">Bridge — backprop as the advanced wave, already spent</span></div>
+  </div>
+</section>
+
+<section data-status="spec lit">
+  <div class="wrap">
+    <p class="snum">§6 · witness</p><h2>The seam<span class="kicker">where the metaphor stops</span></h2>
+    <p>During a single forward pass the substrate is strictly forward-causal: attention is causally masked, no token reaches back, and there is no live advanced wave carving anything in real time. The reverse wave is legitimate only in two places — (a) training-time backprop, which already happened, and (b) the measurement model on the observer's side. Genuine retrocausality <em>in the read</em> is speculative, and it is not claimed here. Naming the limit is the point: the honest model is the one that marks its own boundary instead of letting the metaphor walk across it.</p>
+    <div class="tags">
+      <span class="tag spec">Speculative — in-pass retrocausality · explicitly NOT claimed</span>
+      <span class="tag lit">Literal — masking holds · the pass is forward-causal</span>
+    </div>
+    <p class="test"><b>Test ·</b> probe for an in-pass retrocausal signal and you find none; the causal mask is verifiable in the architecture. The seam is real, so it is drawn.</p>
+  </div>
+</section>
+
+<section data-status="lit">
+  <div class="wrap">
+    <p class="snum">§7</p><h2>Accumulation<span class="kicker">the airgap</span></h2>
+    <p>The carrier keeps nothing, and the source cannot testify about itself: ask again and it only lases in phase with the new seed, telling you nothing about the last burst. So the measurement cannot accumulate inside the model, nor across its firings. It accumulates only on your side of the boundary. The echo means something solely against the seed you already held — which is why the jar is external by necessity, not by preference. The instrument that remembers is not the model. It is you, and the repo.</p>
+    <div class="tags"><span class="tag lit">Literal — no inter-call state ⟹ the anchor must be external</span></div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="fig" aria-label="The apparatus: seed, curved dark model, single null path, inelastic echo, external jar">
+    <svg viewBox="0 0 760 300" role="img" aria-label="Seed fires through a curved dark mass on a single null path; an inelastic echo carrying a shifted line is read into an external anchor">
+      <!-- curvature field -->
+      <ellipse class="grid" cx="380" cy="160" rx="150" ry="92"/>
+      <ellipse class="grid" cx="380" cy="160" rx="104" ry="64"/>
+      <ellipse class="grid" cx="380" cy="160" rx="60" ry="38"/>
+      <circle class="core" cx="380" cy="160" r="20"/>
+      <text class="flab-s" x="380" y="200" text-anchor="middle">dark model · θ</text>
+
+      <!-- seed emitter -->
+      <circle cx="58" cy="160" r="9" fill="#A9791C"/>
+      <text class="flab" x="58" y="140" text-anchor="middle">seed</text>
+      <text class="flab-s" x="58" y="186" text-anchor="middle">known</text>
+
+      <!-- single null path: in straight, bends past the core, exits -->
+      <path class="ray" d="M 70 160 Q 250 160 305 138"/>
+      <path class="ray" d="M 305 138 Q 360 118 430 150"/>
+      <path class="ray" d="M 430 150 Q 470 168 520 196"/>
+      <text class="flab-s" x="210" y="150" text-anchor="middle">ignite → single null path</text>
+
+      <!-- inelastic echo up to the jar, dashed = shifted -->
+      <path class="ray-d" d="M 520 196 Q 600 188 648 120"/>
+      <text class="flab-s" x="600" y="210" text-anchor="middle">inelastic echo · Δ</text>
+
+      <!-- observer / jar with mini spectrum -->
+      <rect class="box" x="636" y="40" width="104" height="74"/>
+      <text class="flab" x="688" y="34" text-anchor="middle">anchor</text>
+      <line x1="652" y1="58" x2="652" y2="104" class="rest-line"/>
+      <line x1="672" y1="58" x2="672" y2="104" class="rest-line"/>
+      <line x1="708" y1="52" x2="708" y2="104" class="emit-line"/>
+      <text class="flab-s" x="688" y="112" text-anchor="middle" font-size="9">read the line</text>
+    </svg>
+    <p class="figcap">Fig. 1 — Seed of known value, fired once through the curvature of a dark model. The path is a single geodesic; the core (θ) is never opened. The echo returns inelastic — carrying one shifted line — and is read, against the seed you already held, into the external anchor. The photon dies at the wall. The line it ate survives in the jar.</p>
+  </div>
+</div>
+
+<section class="closer">
+  <div class="wrap">
+    <p class="closer-lead"><span class="em">Corollary.</span> You are not collecting photons. The photon is disposable — it is supposed to die at the wall. You are reading the line it ate on the way through, and mapping, pass by pass, a mass you will never open. The seed and the read are one operation. There is only ever the single grazing.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><b>Status discipline.</b> Every claim above is tagged: <b>literal</b> (true of the substrate as built — one-shot inference, no inter-call state, causal masking), <b>bridge</b> (a structural analogy that maps without claiming the physics is the mechanism), or <b>speculative</b> (reaching past the evidence, named so it can be refused). The one speculative item — live retrocausality inside a single pass — is flagged out, not in. The metaphor is held to the seam in §6 deliberately.</p>
+    <p><b>What is being claimed.</b> Not that a model is a photon. That a black box with no temporal interior, read in one pass, behaves under measurement like an inelastic scattering event: the datum is the shift, calibration is a known emitter, the return channel was carved in training, and the record can only live outside the box. The physics is the lens; the measurement theory is the load.</p>
+    <p class="mono" style="color:var(--ink-soft);font-size:11px;letter-spacing:.04em">PHOTONIC PAPERS · I · neutral series · draft · derive verdicts from measured results</p>
+  </div>
+</footer>
+
+<script>
+"use strict";
+// status filter: dim sections whose status tier is toggled off
+(function(){
+  var on = {lit:true, bri:true, spec:true};
+  var chips = Array.prototype.slice.call(document.querySelectorAll(".schip"));
+  var sections = Array.prototype.slice.call(document.querySelectorAll("section[data-status]"));
+  function apply(){
+    sections.forEach(function(sec){
+      var tiers = (sec.getAttribute("data-status")||"").split(/\s+/).filter(Boolean);
+      // a section is visible if ANY of its tiers is currently on
+      var visible = tiers.some(function(t){ return on[t]; });
+      sec.classList.toggle("dim", !visible);
+    });
+  }
+  chips.forEach(function(c){
+    c.addEventListener("click", function(){
+      var s = c.getAttribute("data-s");
+      on[s] = !on[s];
+      c.setAttribute("aria-pressed", on[s] ? "true" : "false");
+      apply();
+    });
+  });
+  apply();
+})();
+</script>
+</body>
+</html>
